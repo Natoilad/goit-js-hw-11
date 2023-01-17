@@ -1,2 +1,2 @@
 import './js/base';
-import './js/fetchRequest';
+// import './js/fetchRequest';
