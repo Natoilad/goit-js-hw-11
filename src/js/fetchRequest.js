@@ -1,15 +1,15 @@
 import axios from 'axios';
-export async function fetchRequest(name, page) {
+export async function fetchRequest(request, page) {
   const BASE_URL = 'https://pixabay.com/api/';
   const KEY_API = '32891390-a52999f78b5dd379dfcc20192';
   const responce = await axios.get(
-    `${BASE_URL}?key=${KEY_API}&q=${name}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
+    `${BASE_URL}?key=${KEY_API}&q=${request}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${page}`
   );
   const test = responce.data;
   console.dir(test);
   return await responce.data;
 }
-fetchRequest('sparrow', 1);
+// fetchRequest();
 
 // const fetchRequest = async (name, page) => {
 //   try {
