@@ -1,5 +1,4 @@
 import './sass/index.scss';
-import axios from 'axios';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
@@ -11,8 +10,7 @@ const options = {
   threshold: 1.0,
 };
 
-// const observer = new IntersectionObserver(infinityScroll, options);
-let page = 2;
+let page = 1;
 
 const form = document.querySelector('.search-form');
 const inputEl = document.querySelector('.inputRequest');
@@ -28,25 +26,31 @@ const inputRequest = e => {
   e.preventDefault();
   const request = inputEl.value.trim();
   if (!request) {
+    Notify.failure(
+      `Sorry, there are no images matching your search query. Please try again.`
+    );
+
     markupReset();
     return;
   }
   page = 1;
   fetchRequest(request, page)
     .then(data => {
-      if (!data) {
-        markupReset();
+      if (data.totalHits === 0) {
         Notify.failure(
           `Sorry, there are no images matching your search query. Please try again.`
         );
+        markupReset();
+
         return;
       } else {
         Notify.success(`Hooray! We found ${data.totalHits} images.`);
       }
       const markup = createNewMarkup(data);
       currentMarkup(markup);
+
       lightbox.refresh();
-      // observer.observe(guard);
+      observer.observe(guard);
     })
     .catch(errorMsg);
 };
@@ -69,9 +73,6 @@ const createNewMarkup = data => {
               <p class="info-item"><b>Views</b><br>${views}</p>
               <p class="info-item"><b>Comments</b><br>${comments}</p>
               <p class="info-item"><b>Downloads</b><br>${downloads}</p>
-              
-       
-             
             </div>
           </div>
         </a>
@@ -79,12 +80,31 @@ const createNewMarkup = data => {
   );
   return markup.join('');
 };
-function currentMarkup(markup) {
-  gallery.innerHTML = markup;
-}
+
+const loadMarkup = markup => gallery.insertAdjacentHTML('beforeend', markup);
+const currentMarkup = markup => (gallery.innerHTML = markup);
 const errorMsg = err => Notify.failure(`${err}`);
+
+const infinityScroll = data =>
+  data.forEach(el => {
+    if (el.isIntersecting) {
+      page += 1;
+      fetchRequest(inputEl.value, page)
+        .then(data => {
+          console.log(page);
+          const markup = createNewMarkup(data);
+          loadMarkup(markup);
+          lightbox.refresh();
+          if (data.totalHits / 40 <= page) {
+            observer.unobserve(guard);
+            Notify.failure(
+              `We're sorry, but you've reached the end of search results.`
+            );
+          }
+        })
+        .catch(errorMsg);
+    }
+  });
+const observer = new IntersectionObserver(infinityScroll, options);
 const lightbox = new SimpleLightbox('.gallery a');
 form.addEventListener('submit', inputRequest);
-// console.log(axios.isCancel('something'));
-// const BASE_URL =
-// `https://pixabay.com/api/?key=32891390-a52999f78b5dd379dfcc20192&q=cat&image_type=photo&orientation=horizontal&safesearch=true
