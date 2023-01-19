@@ -45,12 +45,13 @@ const inputRequest = e => {
         return;
       } else {
         Notify.success(`Hooray! We found ${data.totalHits} images.`);
-      }
-      const markup = createNewMarkup(data);
-      currentMarkup(markup);
 
-      lightbox.refresh();
-      observer.observe(guard);
+        const markup = createNewMarkup(data);
+        currentMarkup(markup);
+
+        lightbox.refresh();
+        observer.observe(guard);
+      }
     })
     .catch(errorMsg);
 };
@@ -85,16 +86,26 @@ const loadMarkup = markup => gallery.insertAdjacentHTML('beforeend', markup);
 const currentMarkup = markup => (gallery.innerHTML = markup);
 const errorMsg = err => Notify.failure(`${err}`);
 
-const infinityScroll = data =>
-  data.forEach(el => {
-    if (el.isIntersecting) {
-      page += 1;
+const infinityScroll = elements =>
+  elements.forEach(el => {
+    const request = inputEl.value.trim();
+    if (!request) {
+      Notify.failure(
+        `Sorry, there are no images matching your search query. Please try again.`
+      );
+
+      // markupReset();
+      return;
+    } else if (el.isIntersecting) {
+      // page += 1;
       fetchRequest(inputEl.value, page)
         .then(data => {
           console.log(page);
           const markup = createNewMarkup(data);
           loadMarkup(markup);
           lightbox.refresh();
+          page += 1;
+
           if (data.totalHits / 40 <= page) {
             observer.unobserve(guard);
             Notify.failure(
