@@ -6,6 +6,14 @@ body {
   background-color: black;
 }
 
+.submitBtn {
+  background-color: #fff;
+}
+.submitBtn:hover {
+  box-shadow: 0px 5px 5px 0px rgba(255, 255, 255, 0.2),
+    0px 5px 5px 0px rgba(255, 255, 255, 0.14),
+    0px 5px 5px -1px rgba(255, 255, 255, 0.12);
+}
 .btn-to-top {
   background-color: #fff;
   width: 30px;
