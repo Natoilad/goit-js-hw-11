@@ -15,9 +15,9 @@ const markupReset = request => {
   gallery.innerHTML = '';
 };
 
-const inputRequest = e => {
+const inputRequest = async e => {
   e.preventDefault();
-  const request = inputEl.value.trim();
+  const request = await inputEl.value.trim();
   if (!request) {
     markupReset();
     Notify.failure(
@@ -27,24 +27,25 @@ const inputRequest = e => {
   }
   try {
     page = 1;
-    fetchRequest(request, page).then(data => {
-      if (!data) {
-        markupReset();
-        Notify.failure(
-          `Sorry, there are no images matching your search query. Please try again.`
-        );
+    const data = await fetchRequest(request, page);
+    // console.log(data);
+    if (!data) {
+      // console.dir(data);
+      markupReset();
+      Notify.failure(
+        `Sorry, there are no images matching your search query. Please try again.`
+      );
 
-        return;
-      } else {
-        Notify.success(`Hooray! We found ${data.totalHits} images.`);
+      return;
+    } else {
+      Notify.success(`Hooray! We found ${data.totalHits} images.`);
 
-        const markup = createNewMarkup(data);
-        currentMarkup(markup);
+      const markup = createNewMarkup(data);
+      currentMarkup(markup);
 
-        lightbox.refresh();
-        observer.observe(guard);
-      }
-    });
+      lightbox.refresh();
+      observer.observe(guard);
+    }
   } catch (err) {
     errorMsg;
   }
@@ -76,8 +77,9 @@ const createNewMarkup = data => {
   return markup.join('');
 };
 
-const infinityScroll = elements =>
+const infinityScroll = async elements =>
   elements.forEach(el => {
+    // page += 1;
     const request = inputEl.value.trim();
     if (!request) {
       markupReset();
@@ -87,31 +89,32 @@ const infinityScroll = elements =>
       return;
     }
     try {
-      const request = inputEl.value.trim();
-      if (!request) {
-        markupReset();
-        Notify.failure(
-          `Sorry, there are no images matching your search query. Please try again.`
-        );
-        return;
-      } else if (el.isIntersecting) {
-        // page += 1;
-        fetchRequest(inputEl.value, page)
-          .then(data => {
-            console.log(page);
-            const markup = createNewMarkup(data);
-            loadMarkup(markup);
-            lightbox.refresh();
-            page += 1;
+      // page += 1;
+      // const request = inputEl.value.trim();
+      // if (!request) {
+      //   markupReset();
+      //   Notify.failure(
+      //     `Sorry, there are no images matching your search query. Please try again.`
+      //   );
+      //   return;
+      // }
+      // else
+      if (el.isIntersecting) {
+        page += 1;
+        fetchRequest(inputEl.value, page).then(data => {
+          // page += 1;
+          console.log(page);
+          const markup = createNewMarkup(data);
+          loadMarkup(markup);
+          lightbox.refresh();
 
-            if (data.totalHits / 40 <= page) {
-              observer.unobserve(guard);
-              Notify.failure(
-                `We're sorry, but you've reached the end of search results.`
-              );
-            }
-          })
-          .catch(errorMsg);
+          if (data.totalHits / 40 <= page) {
+            observer.unobserve(guard);
+            Notify.failure(
+              `We're sorry, but you've reached the end of search results.`
+            );
+          }
+        });
       }
     } catch (err) {
       errorMsg;
