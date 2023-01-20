@@ -4,43 +4,35 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import { fetchRequest } from './js/fetchRequest';
 
-const options = {
-  root: null,
-  rootMargin: '300px',
-  threshold: 1.0,
-};
-
 let page = 1;
 
 const form = document.querySelector('.search-form');
 const inputEl = document.querySelector('.inputRequest');
-// const btnSubmit = document.querySelector('.submitBtn');
 const gallery = document.querySelector('.gallery');
 const guard = document.querySelector('.js-guard');
 
-function markupReset(markup) {
+const markupReset = request => {
   gallery.innerHTML = '';
-}
+};
 
 const inputRequest = e => {
   e.preventDefault();
   const request = inputEl.value.trim();
   if (!request) {
+    markupReset();
     Notify.failure(
       `Sorry, there are no images matching your search query. Please try again.`
     );
-
-    markupReset();
     return;
   }
-  page = 1;
-  fetchRequest(request, page)
-    .then(data => {
-      if (data.totalHits === 0) {
+  try {
+    page = 1;
+    fetchRequest(request, page).then(data => {
+      if (!data) {
+        markupReset();
         Notify.failure(
           `Sorry, there are no images matching your search query. Please try again.`
         );
-        markupReset();
 
         return;
       } else {
@@ -52,8 +44,10 @@ const inputRequest = e => {
         lightbox.refresh();
         observer.observe(guard);
       }
-    })
-    .catch(errorMsg);
+    });
+  } catch (err) {
+    errorMsg;
+  }
 };
 
 const createNewMarkup = data => {
@@ -82,40 +76,55 @@ const createNewMarkup = data => {
   return markup.join('');
 };
 
-const loadMarkup = markup => gallery.insertAdjacentHTML('beforeend', markup);
-const currentMarkup = markup => (gallery.innerHTML = markup);
-const errorMsg = err => Notify.failure(`${err}`);
-
 const infinityScroll = elements =>
   elements.forEach(el => {
     const request = inputEl.value.trim();
     if (!request) {
+      markupReset();
       Notify.failure(
         `Sorry, there are no images matching your search query. Please try again.`
       );
-
-      // markupReset();
       return;
-    } else if (el.isIntersecting) {
-      // page += 1;
-      fetchRequest(inputEl.value, page)
-        .then(data => {
-          console.log(page);
-          const markup = createNewMarkup(data);
-          loadMarkup(markup);
-          lightbox.refresh();
-          page += 1;
+    }
+    try {
+      const request = inputEl.value.trim();
+      if (!request) {
+        markupReset();
+        Notify.failure(
+          `Sorry, there are no images matching your search query. Please try again.`
+        );
+        return;
+      } else if (el.isIntersecting) {
+        // page += 1;
+        fetchRequest(inputEl.value, page)
+          .then(data => {
+            console.log(page);
+            const markup = createNewMarkup(data);
+            loadMarkup(markup);
+            lightbox.refresh();
+            page += 1;
 
-          if (data.totalHits / 40 <= page) {
-            observer.unobserve(guard);
-            Notify.failure(
-              `We're sorry, but you've reached the end of search results.`
-            );
-          }
-        })
-        .catch(errorMsg);
+            if (data.totalHits / 40 <= page) {
+              observer.unobserve(guard);
+              Notify.failure(
+                `We're sorry, but you've reached the end of search results.`
+              );
+            }
+          })
+          .catch(errorMsg);
+      }
+    } catch (err) {
+      errorMsg;
     }
   });
-const observer = new IntersectionObserver(infinityScroll, options);
+const options = {
+  root: null,
+  rootMargin: '300px',
+  threshold: 1.0,
+};
 const lightbox = new SimpleLightbox('.gallery a');
+const loadMarkup = markup => gallery.insertAdjacentHTML('beforeend', markup);
+const currentMarkup = markup => (gallery.innerHTML = markup);
+const errorMsg = err => Notify.failure(`${err}`);
+const observer = new IntersectionObserver(infinityScroll, options);
 form.addEventListener('submit', inputRequest);
