@@ -7,29 +7,31 @@
     <!-- <link rel="stylesheet" href="./sass/index.scss" /> -->
   </head>
   <body>
-    <form class="search-form" id="search-form">
-      <input
-        class="inputRequest"
-        type="text"
-        name="searchQuery"
-        autocomplete="off"
-        placeholder="Search images..."
-      />
-      <button class="submitBtn" type="submit">Search</button>
-      <div class="btn-up-container">
-        <a class="btn-to-top" href="#search-form" title="Return to top">
-          <svg width="20" height="20" class="icon-up">
-            <use href="./images/svg-sprite.svg#icon-go-up"></use>
-          </svg>
-        </a>
+    <div class="container">
+      <form class="search-form" id="search-form">
+        <input
+          class="inputRequest"
+          type="text"
+          name="searchQuery"
+          autocomplete="off"
+          placeholder="Search images..."
+        />
+        <button class="submitBtn" type="submit">Search</button>
+        <div class="btn-up-container">
+          <a class="btn-to-top" href="#search-form" title="Return to top">
+            <svg width="20" height="20" class="icon-up">
+              <use href="./images/svg-sprite.svg#icon-go-up"></use>
+            </svg>
+          </a>
+        </div>
+      </form>
+      <div class="gallery">
+        <!-- Картки зображень -->
       </div>
-    </form>
-    <div class="gallery">
-      <!-- Картки зображень -->
+      <div class="js-guard"></div>
+      <div class="test"></div>
+      <script type="module" src="./index.js"></script>
+      <script type="module" src="../src/js/scroll.js"></script>
     </div>
-    <div class="js-guard"></div>
-    <div class="test"></div>
-    <script type="module" src="./index.js"></script>
-    <script type="module" src="../src/js/scroll.js"></script>
   </body>
 </html>
