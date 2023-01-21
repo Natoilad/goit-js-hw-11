@@ -14,35 +14,31 @@ const guard = document.querySelector('.js-guard');
 const markupReset = request => {
   gallery.innerHTML = '';
 };
+const sorryMsg = e => {
+  Notify.failure(
+    `Sorry, there are no images matching your search query. Please try again.`
+  );
+};
 
 const inputRequest = async e => {
   e.preventDefault();
   const request = await inputEl.value.trim();
   if (!request) {
     markupReset();
-    Notify.failure(
-      `Sorry, there are no images matching your search query. Please try again.`
-    );
+    sorryMsg();
     return;
   }
   try {
     page = 1;
     const data = await fetchRequest(request, page);
-    // console.log(data);
-    if (!data) {
-      // console.dir(data);
+    if (!data.total) {
       markupReset();
-      Notify.failure(
-        `Sorry, there are no images matching your search query. Please try again.`
-      );
-
+      sorryMsg();
       return;
     } else {
       Notify.success(`Hooray! We found ${data.totalHits} images.`);
-
       const markup = createNewMarkup(data);
       currentMarkup(markup);
-
       lightbox.refresh();
       observer.observe(guard);
     }
@@ -78,43 +74,24 @@ const createNewMarkup = data => {
 };
 
 const infinityScroll = async elements =>
-  elements.forEach(el => {
-    // page += 1;
+  elements.forEach(async el => {
     const request = inputEl.value.trim();
     if (!request) {
-      markupReset();
-      Notify.failure(
-        `Sorry, there are no images matching your search query. Please try again.`
-      );
       return;
     }
     try {
-      // page += 1;
-      // const request = inputEl.value.trim();
-      // if (!request) {
-      //   markupReset();
-      //   Notify.failure(
-      //     `Sorry, there are no images matching your search query. Please try again.`
-      //   );
-      //   return;
-      // }
-      // else
       if (el.isIntersecting) {
         page += 1;
-        fetchRequest(inputEl.value, page).then(data => {
-          // page += 1;
-          console.log(page);
-          const markup = createNewMarkup(data);
-          loadMarkup(markup);
-          lightbox.refresh();
-
-          if (data.totalHits / 40 <= page) {
-            observer.unobserve(guard);
-            Notify.failure(
-              `We're sorry, but you've reached the end of search results.`
-            );
-          }
-        });
+        const data = await fetchRequest(request, page);
+        const markup = createNewMarkup(data);
+        loadMarkup(markup);
+        lightbox.refresh();
+        if (data.totalHits / 40 <= page) {
+          observer.unobserve(guard);
+          Notify.failure(
+            `We're sorry, but you've reached the end of search results.`
+          );
+        }
       }
     } catch (err) {
       errorMsg;

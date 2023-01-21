@@ -8,6 +8,6 @@ export async function fetchRequest(request, page) {
     );
     return responce.data;
   } catch (err) {
-    throw new Error(responce.statusText);
+    throw new Error(console.log(responce.statusText));
   }
 }
