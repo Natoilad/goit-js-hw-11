@@ -6,13 +6,11 @@ body {
   background-color: black;
 }
 .container {
-  width: 100%;
   margin-left: auto;
   margin-right: auto;
   padding-left: 20px;
   padding-right: 20px;
   @media screen and(min-width: 1200px) {
-    width: 1160px;
     padding-left: 20px;
     padding-right: 20px;
   }
